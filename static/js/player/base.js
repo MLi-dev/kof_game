@@ -31,6 +31,11 @@ class Player extends AcGameObject {
 			this.vy = 0;
 			if (this.status === 3) this.status = 0;
 		}
+		if (this.x < 0) {
+			this.x = 0;
+		} else if (this.x + this.width > this.root.game_map.$canvas.width()) {
+			this.x = this.root.game_map.$canvas.width() - this.width;
+		}
 	}
 	update_control() {
 		let w, a, d, space;
@@ -46,7 +51,11 @@ class Player extends AcGameObject {
 			space = this.pressed_keys.has("Enter");
 		}
 		if (this.status === 0 || this.status === 1) {
-			if (w) {
+			if (space) {
+				this.frame_current_cnt = 0;
+				this.status = 4;
+				this.vx = 0;
+			} else if (w) {
 				if (d) {
 					this.vx += this.speedx;
 				} else if (a) {
@@ -62,10 +71,6 @@ class Player extends AcGameObject {
 			} else if (d) {
 				this.vx = this.speedx;
 				this.status = 1;
-			} else if (space) {
-				this.frame_current_cnt = 0;
-				this.status = 4;
-				this.vx = 0;
 			} else {
 				this.status = 0;
 				this.vx = 0;
@@ -81,10 +86,55 @@ class Player extends AcGameObject {
 			else me.direction = -1;
 		}
 	}
+	is_collision(r1, r2) {
+		if (Math.max(r1.x1, r2.x1) > Math.min(r1.x2, r2.x2)) {
+			return false;
+		}
+		if (Math.max(r1.y1, r2.y1) > Math.min(r1.y2, r2.y2)) {
+			return false;
+		}
+		return true;
+	}
+	is_attack() {
+		this.status = 5;
+		this.frame_current_cnt = 0;
+	}
+	update_attack() {
+		if (this.status === 4 && this.frame_current_cnt === 18) {
+			let me = this,
+				you = this.root.players[1 - this.id];
+			let r1;
+			if (this.direction === 1) {
+				r1 = {
+					x1: me.x + 120,
+					y1: me.y + 40,
+					x2: me.x + 120 + 100,
+					y2: me.y + 40 + 20,
+				};
+			} else {
+				r1 = {
+					x1: me.x + me.width - 120 - 100,
+					y1: me.y + 40,
+					x2: me.x + me.width - 120 - 100 + 100,
+					y2: me.y + 40 + 20,
+				};
+			}
+			let r2 = {
+				x1: you.x,
+				y1: you.y,
+				x2: you.x + you.width,
+				y2: you.y + you.height,
+			};
+			if (this.is_collision(r1, r2)) {
+				you.is_attack();
+			}
+		}
+	}
 	update() {
 		this.update_control();
 		this.update_move();
 		this.update_direction();
+		this.update_attack();
 		this.render();
 	}
 
@@ -118,6 +168,12 @@ class Player extends AcGameObject {
 					image.height * obj.scale
 				);
 				this.ctx.restore();
+			}
+			this.frame_current_cnt++;
+		}
+		if (status === 4 || status === 5) {
+			if (this.frame_current_cnt === obj.frame_rate * (obj.frame_cnt - 1)) {
+				this.status = 0;
 			}
 		}
 	}
