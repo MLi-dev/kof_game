@@ -20,6 +20,9 @@ class Player extends AcGameObject {
 		this.status = 3;
 		this.animations = new Map();
 		this.frame_current_cnt = 0;
+		this.hp = 100;
+		this.$hp = this.root.$kof.find(`.kof-head-hp-${this.id}>div`);
+		this.$hp_div = this.root.$kof.find(`.kof-head-hp-${this.id}>div>div`);
 	}
 	start() {}
 	update_move() {
@@ -78,6 +81,9 @@ class Player extends AcGameObject {
 		}
 	}
 	update_direction() {
+		if (this.status === 6) {
+			return;
+		}
 		let players = this.root.players;
 		if (players[0] && players[1]) {
 			let me = this,
@@ -96,8 +102,26 @@ class Player extends AcGameObject {
 		return true;
 	}
 	is_attack() {
+		// if (this.status === 6) {
+		// 	return;
+		// }
+		let me = this,
+			you = this.root.players[1 - this.id];
+		this.hp = Math.max(this.hp - 20, 0);
+		let percent = this.hp / 100;
+		// this.$hp.width(this.$hp.parent().width() * percent);
+		this.$hp_div.animate({ width: this.$hp.parent().width() * percent }, 300);
+		this.$hp.animate({ width: this.$hp.parent().width() * percent }, 800);
 		this.status = 5;
 		this.frame_current_cnt = 0;
+		if (this.hp <= 0) {
+			this.status = 6;
+			this.vx = 0;
+			this.frame_current_cnt = 0;
+			you.status = 7;
+			you.vx = 0;
+			you.frame_current_cnt = 0;
+		}
 	}
 	update_attack() {
 		if (this.status === 4 && this.frame_current_cnt === 18) {
@@ -141,6 +165,7 @@ class Player extends AcGameObject {
 	render() {
 		let status = this.status;
 		let obj = this.animations.get(status);
+		console.log(this.status);
 		if (obj && obj.loaded) {
 			if (this.direction === 1) {
 				let k =
@@ -171,9 +196,13 @@ class Player extends AcGameObject {
 			}
 			this.frame_current_cnt++;
 		}
-		if (status === 4 || status === 5) {
+		if (status === 4 || status === 5 || status === 6 || status === 7) {
 			if (this.frame_current_cnt === obj.frame_rate * (obj.frame_cnt - 1)) {
-				this.status = 0;
+				if (status === 6) {
+					this.frame_current_cnt--;
+				} else if (status !== 7) {
+					this.status = 0;
+				}
 			}
 		}
 	}
