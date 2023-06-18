@@ -105,7 +105,7 @@
   <div></div>
   ```
 
-- ![Screen Shot 2023-06-17 at 2.07.40 PM](/Users/matthew/summer_dev/kof_game/Notes for Web Development/Screen Shot 2023-06-17 at 2.07.40 PM.jpg)
+- ![Screen Shot 2023-06-17 at 2.07.40 PM](./Notes for Web Development/Screen Shot 2023-06-17 at 2.07.40 PM.jpg)
 
 
 
