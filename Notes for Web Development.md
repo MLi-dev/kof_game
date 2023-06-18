@@ -105,7 +105,7 @@
   <div></div>
   ```
 
-- ![Screen Shot 2023-06-17 at 2.07.40 PM](./Notes for Web Development/Screen Shot 2023-06-17 at 2.07.40 PM.jpg)
+- ![Screen Shot 2023-06-17 at 2.07.40 PM](https://raw.githubusercontent.com/MLi-dev/kof_game/self_practice/Notes%20for%20Web%20Development/Screen%20Shot%202023-06-16%20at%203.52.04%20PM.jpg)
 
 
 
