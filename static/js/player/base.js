@@ -41,16 +41,20 @@ class Player extends AcGameObject {
 		}
 	}
 	update_control() {
-		let w, a, d, space;
+		let w, a, d, kick, s, space;
 		if (this.id == 0) {
 			a = this.pressed_keys.has("a");
 			w = this.pressed_keys.has("w");
 			d = this.pressed_keys.has("d");
+			kick = this.pressed_keys.has("1");
+			s = this.pressed_keys.has("s");
 			space = this.pressed_keys.has(" ");
 		} else {
 			a = this.pressed_keys.has("ArrowLeft");
 			w = this.pressed_keys.has("ArrowUp");
 			d = this.pressed_keys.has("ArrowRight");
+			kick = this.pressed_keys.has("-");
+			s = this.pressed_keys.has("ArrowDown");
 			space = this.pressed_keys.has("Enter");
 		}
 		if (this.status === 0 || this.status === 1) {
@@ -74,7 +78,21 @@ class Player extends AcGameObject {
 			} else if (d) {
 				this.vx = this.speedx;
 				this.status = 1;
+			} else if (s) {
+				this.vx = 0;
+				this.frame_current_cnt = 0;
+				this.status = 9;
+			} else if (kick) {
+				this.frame_current_cnt = 0;
+				this.status = 8;
+				this.vx = 0;
 			} else {
+				this.status = 0;
+				this.vx = 0;
+			}
+		} else if (this.status === 9) {
+			if (d || a || space || w || kick) {
+				this.frame_current_cnt = 0;
 				this.status = 0;
 				this.vx = 0;
 			}
@@ -102,9 +120,6 @@ class Player extends AcGameObject {
 		return true;
 	}
 	is_attack() {
-		// if (this.status === 6) {
-		// 	return;
-		// }
 		let me = this,
 			you = this.root.players[1 - this.id];
 		this.hp = Math.max(this.hp - 20, 0);
@@ -124,7 +139,10 @@ class Player extends AcGameObject {
 		}
 	}
 	update_attack() {
-		if (this.status === 4 && this.frame_current_cnt === 18) {
+		if (
+			(this.status === 4 && this.frame_current_cnt === 18) ||
+			(this.status === 8 && this.frame_current_cnt === 3)
+		) {
 			let me = this,
 				you = this.root.players[1 - this.id];
 			let r1;
@@ -165,7 +183,6 @@ class Player extends AcGameObject {
 	render() {
 		let status = this.status;
 		let obj = this.animations.get(status);
-		console.log(this.status);
 		if (obj && obj.loaded) {
 			if (this.direction === 1) {
 				let k =
@@ -196,9 +213,18 @@ class Player extends AcGameObject {
 			}
 			this.frame_current_cnt++;
 		}
-		if (status === 4 || status === 5 || status === 6 || status === 7) {
+		if (
+			status === 4 ||
+			status === 5 ||
+			status === 6 ||
+			status === 7 ||
+			status === 8 ||
+			status === 9
+		) {
 			if (this.frame_current_cnt === obj.frame_rate * (obj.frame_cnt - 1)) {
 				if (status === 6) {
+					this.frame_current_cnt--;
+				} else if (status === 9) {
 					this.frame_current_cnt--;
 				} else if (status !== 7) {
 					this.status = 0;
